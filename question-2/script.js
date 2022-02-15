@@ -1,7 +1,7 @@
 /**
  * On this module you should write your answer to question #2.
  * This file would be executed with the following command:
- * $ node scritp.js BrowsingEvents.csv
+ * $ node script.js BrowsingEvents.csv
  */
 const csv = require("csv-parser");
 const fs = require("fs");
@@ -15,16 +15,20 @@ const csvWriter = createCsvWriter({
     { id: "productId", title: "productId" },
     { id: "clicks", title: "clicks" },
     { id: "impressions", title: "impressions" },
-    { id: "ctr", title: "ctr" },
+    { id: "ctr", title: "ctr" }
   ],
 });
 fs.createReadStream(args.toString())
   .pipe(csv())
   .on("data", (data) => results.push(data))
-  .on("end", () => {
-    const uniqueUsers = [...new Set(results.map((result) => result.user))];
+  .on("end", () => {   
+    const extractProducts = results.map(result => { });
     const uniqueProducts = [
-      ...new Set(results.map((result) => result.entityId)),
+      ...new Set(results.map((result) => {
+        if(result.entityType === 'product'){
+          return result.entityId
+        }
+      }))
     ];
     let data = [];
     uniqueProducts.forEach((product) => {
@@ -40,12 +44,12 @@ fs.createReadStream(args.toString())
       });
       let uniqueClicksPerProduct = [...new Set(clicksPerProduct)].length;
       let uniqueVisitsPerProduct = [...new Set(visitsPerProduct)].length;
-      let ctr = (uniqueClicksPerProduct / uniqueVisitsPerProduct) * 100;
+      let ctr = (clicksPerProduct.length / visitsPerProduct.length) * 100;
       data.push({
         productId: product,
         clicks: uniqueClicksPerProduct,
         impressions: uniqueVisitsPerProduct,
-        ctr: ctr,
+        ctr: ctr
       });
     });
     csvWriter
